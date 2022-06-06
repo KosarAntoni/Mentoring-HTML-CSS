@@ -18,7 +18,9 @@ const performanceCheck = (elementId, callback) => {
 
   const generateTable = () => {
     const handleCellClick = (e) => {
-      e.target.classList.add("selected");
+      if (!e.target.classList.contains("selected")) {
+        e.target.classList.add("selected");
+      }
     };
 
     for (let i = 0; i < rowsCount; i++) {
@@ -45,7 +47,10 @@ const performanceCheck = (elementId, callback) => {
 
   const generateTable = () => {
     const handleCellClick = (e) => {
-      if (e.target.nodeName === "TD") {
+      if (
+        e.target.nodeName === "TD" &&
+        !e.target.classList.contains("selected")
+      ) {
         e.target.classList.add("selected");
       }
     };
