@@ -7,7 +7,7 @@ interface GetFullNameClassInterface {
     getFullName(): string;
 }
 
-abstract class AbstractClass {
+abstract class AbstractClass implements AbstractClassInterface {
     firstName;
     lastName;
 
