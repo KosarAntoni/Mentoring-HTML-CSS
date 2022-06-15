@@ -13,6 +13,7 @@ export class Point {
 
     distance(...args: (number | Point)[]): number {
         const getDistance = (x1: number, x2: number, y1: number, y2: number) => Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+        const isNumber = (value: number | object): boolean => (!(typeof value === "object") && !isNaN(value));
 
         if (!args.length) {
             return getDistance(this.x, 0, this.y, 0);
@@ -27,12 +28,11 @@ export class Point {
 
         if (args.length === 2) {
             const [x, y] = args;
-            const isNumber = (value: number | object): boolean => (!(typeof value === "object") && !isNaN(value));
             if (!isNumber(x) && !isNumber(y)) throw new Error("Values should be a numbers");
 
             return getDistance(this.x, +x, this.y, +y);
         }
 
-        return 0
+        throw new Error("Arguments dont match");
     }
 }
