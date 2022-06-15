@@ -12,23 +12,25 @@ export class Point {
     }
 
     distance(...args: (number | Point)[]): number {
+        const getDistance = (x1: number, x2: number, y1: number, y2: number) => Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+
         if (!args.length) {
-            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+            return getDistance(this.x, 0, this.y, 0);
         }
 
         if (args.length === 1) {
             const [point] = args;
-            if (!(point instanceof Point)) return 0;
+            if (!(point instanceof Point)) throw new Error("Value should be a Point");
 
-            return Math.sqrt(Math.pow((this.x - point.x), 2) + Math.pow((this.y - point.y), 2));
+            return getDistance(this.x, point.x, this.y, point.y);
         }
 
         if (args.length === 2) {
             const [x, y] = args;
             const isNumber = (value: number | object): boolean => (!(typeof value === "object") && !isNaN(value));
-            if (!isNumber(x) && !isNumber(y)) return 0;
+            if (!isNumber(x) && !isNumber(y)) throw new Error("Values should be a numbers");
 
-            return Math.sqrt(Math.pow((this.x - +x), 2) + Math.pow((this.y - +y), 2));
+            return getDistance(this.x, +x, this.y, +y);
         }
 
         return 0
