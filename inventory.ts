@@ -51,8 +51,59 @@ abstract class Consumable {
 
 }
 
-abstract class Weapon {
+abstract class Weapon extends Item {
+    baseDamage: number;
+    damageModifier: number;
+    baseDurability: number;
+    durabilityModifier: number;
+    isBroken: boolean;
+    MODIFIER_CHANGE_RATE: number;
 
+    constructor(name: string,
+        value: number,
+        weight: number,
+        baseDamage: number,
+        damageModifier: number,
+        baseDurability: number,
+        durabilityModifier: number
+    ) {
+        super(name, value, weight);
+
+        this.baseDamage = baseDamage;
+        this.damageModifier = damageModifier;
+        this.baseDurability = baseDurability;
+        this.durabilityModifier = durabilityModifier;
+
+        this.isBroken = false;
+        this.MODIFIER_CHANGE_RATE = 0.1;
+    }
+
+    public getDamage() {
+        return this.baseDamage + this.damageModifier;
+    };
+
+    public getDurability() {
+        return this.baseDurability + this.durabilityModifier;
+    };
+
+    public toString(): string {
+        const damage = this.getDamage().toFixed(2);
+        const durability = this.getDurability().toFixed(2);
+
+        return `${this.name} − Value: ${this.value}, Weight : ${this.weight}, Damage : ${damage}, Durability : ${durability}%`
+    }
+
+    public use(): string {
+        if (this.isBroken) return `You can't use the ${this.name}, it is broken.`
+
+        this.baseDurability = this.baseDurability - this.MODIFIER_CHANGE_RATE;
+
+        if (this.baseDurability <= 0) this.isBroken = true;
+        const damage = this.getDamage().toFixed(2);
+        const brokenText = this.isBroken ? ` The ${this.name} breaks.` : '';
+
+        return `You use the ${this.name} , dealing ${damage} points of damage.${brokenText}`;
+    }
 }
 
 class ItemWeightComparator implements ItemComparator {
