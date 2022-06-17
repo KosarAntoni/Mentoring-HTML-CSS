@@ -142,3 +142,24 @@ class Sword extends Weapon {
         }
     }
 }
+
+class Bow extends Weapon {
+    constructor(value: number,
+        weight: number,
+        baseDamage: number,
+        damageModifier: number,
+        baseDurability: number,
+        durabilityModifier: number
+    ) {
+        super('bow', value, weight, baseDamage, damageModifier, baseDurability, durabilityModifier)
+    }
+
+    public polish() {
+        const maxValue = 1;
+
+        if (this.durabilityModifier < maxValue) {
+            const newValue = this.durabilityModifier + this.MODIFIER_CHANGE_RATE;
+            this.durabilityModifier = newValue > maxValue ? maxValue : newValue;
+        }
+    }
+}
