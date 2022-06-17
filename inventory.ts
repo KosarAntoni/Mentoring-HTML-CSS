@@ -42,7 +42,7 @@ abstract class Item implements Comparable {
 
     }
 
-    public toString() {
+    public toString(): string {
         return `${this.name} − Value: ${this.value}, Weight: ${this.weight.toFixed(2)}`;
     }
 }
@@ -78,11 +78,11 @@ abstract class Weapon extends Item {
         this.MODIFIER_CHANGE_RATE = 0.1;
     }
 
-    public getDamage() {
+    public getDamage(): number {
         return this.baseDamage + this.damageModifier;
     };
 
-    public getDurability() {
+    public getDurability(): number {
         return this.baseDurability + this.durabilityModifier;
     };
 
@@ -122,14 +122,23 @@ class Ring extends Item {
     }
 }
 
-const ring = new Ring('golden ring a', 20);
-const ring2 = new Ring('golden ring b', 30);
-const ring3 = new Ring('golden ring b', 30, 0.2);
-const weightComparator = new ItemWeightComparator;
+class Sword extends Weapon {
+    constructor(value: number,
+        weight: number,
+        baseDamage: number,
+        damageModifier: number,
+        baseDurability: number,
+        durabilityModifier: number
+    ) {
+        super('sword', value, weight, baseDamage, damageModifier, baseDurability, durabilityModifier)
+    }
 
-console.log(ring.toString(), ring.id);
-console.log(ring2.toString(), ring2.id);
+    public polish() {
+        const maxValue = this.baseDamage * 0.25;
 
-console.log(ring.compareTo(ring2));
-
-console.log(weightComparator.compare(ring, ring3));
+        if (this.damageModifier < maxValue) {
+            const newValue = this.damageModifier + this.MODIFIER_CHANGE_RATE;
+            this.damageModifier = newValue > maxValue ? maxValue : newValue;
+        }
+    }
+}
