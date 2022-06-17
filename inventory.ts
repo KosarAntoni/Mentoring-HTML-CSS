@@ -47,8 +47,27 @@ abstract class Item implements Comparable {
     }
 }
 
-abstract class Consumable {
+abstract class Consumable extends Item {
+    isConsumed: boolean;
+    isSpoiled: boolean;
 
+    constructor(name: string, value: number, weight: number, isSpoiled: boolean = false) {
+        super(name, value, weight)
+        this.isSpoiled = isSpoiled;
+        this.isConsumed = false;
+    }
+
+    eat(): string {
+        if (this.isConsumed) return `There is nothing left of the ${this.name} to consume.`;
+
+        this.isConsumed = true;
+        const spoiledText = this.isSpoiled ? ' You feel sick.' : '';
+        return `You eat the ${this.name}.${spoiledText}`;
+    }
+
+    use(): void {
+        this.eat();
+    }
 }
 
 abstract class Weapon extends Item {
@@ -90,7 +109,7 @@ abstract class Weapon extends Item {
         const damage = this.getDamage().toFixed(2);
         const durability = this.getDurability().toFixed(2);
 
-        return `${this.name} − Value: ${this.value}, Weight : ${this.weight}, Damage : ${damage}, Durability : ${durability}%`
+        return `${this.name} − Value: ${this.value}, Weight: ${this.weight}, Damage: ${damage}, Durability: ${durability}%`
     }
 
     public use(): string {
@@ -102,7 +121,7 @@ abstract class Weapon extends Item {
         const damage = this.getDamage().toFixed(2);
         const brokenText = this.isBroken ? ` The ${this.name} breaks.` : '';
 
-        return `You use the ${this.name} , dealing ${damage} points of damage.${brokenText}`;
+        return `You use the ${this.name}, dealing ${damage} points of damage.${brokenText}`;
     }
 }
 
@@ -113,12 +132,6 @@ class ItemWeightComparator implements ItemComparator {
         if (first.weight === second.weight) return first.compareTo(second)
 
         return first.weight > second.weight ? 1 : -1;
-    }
-}
-
-class Ring extends Item {
-    constructor(name = "ring", value = 3000, weight = 0.013) {
-        super(name, value, weight);
     }
 }
 
@@ -163,3 +176,31 @@ class Bow extends Weapon {
         }
     }
 }
+
+class Inventory {
+    items: (Weapon)[];
+
+    constructor(items: (Weapon)[]) {
+        this.items = items;
+    }
+
+    sort(comparator?: ItemComparator): void {
+        if (comparator) {
+            this.items.sort((a, b) => comparator.compare(a, b));
+            return;
+        }
+
+        this.items.sort((a, b) => a.compareTo(b));
+    }
+
+    toString(): string {
+        const itemsDescriptions = this.items.map(item => item.toString());
+        return itemsDescriptions.join(", ");
+    }
+}
+
+const inventory = new Inventory([new Sword(3000, 10, 20, 0.5, 0.8, 0.5), new Sword(2000, 30, 20, 0.5, 0.8, 0.5), new Bow(1000, 20, 20, 0.5, 0.8, 0.5)]);
+
+inventory.sort(new ItemWeightComparator);
+
+console.log(inventory.items);
