@@ -51,7 +51,7 @@ abstract class Consumable extends Item {
     isConsumed: boolean;
     isSpoiled: boolean;
 
-    constructor(name: string, value: number, weight: number, isSpoiled: boolean = false) {
+    constructor(name: string, value: number, weight: number, isSpoiled: boolean) {
         super(name, value, weight)
         this.isSpoiled = isSpoiled;
         this.isConsumed = false;
@@ -61,12 +61,14 @@ abstract class Consumable extends Item {
         if (this.isConsumed) return `There is nothing left of the ${this.name} to consume.`;
 
         this.isConsumed = true;
-        const spoiledText = this.isSpoiled ? ' You feel sick.' : '';
-        return `You eat the ${this.name}.${spoiledText}`;
+        return `You eat the ${this.name}.`;
     }
 
-    use(): void {
-        this.eat();
+    use(): string {
+        const spoiledText = this.isSpoiled ? ' You feel sick.' : '';
+
+        return `${this.eat()}${spoiledText}`;
+
     }
 }
 
@@ -177,10 +179,30 @@ class Bow extends Weapon {
     }
 }
 
-class Inventory {
-    items: (Weapon)[];
+class Pizza extends Consumable {
+    slices: number;
 
-    constructor(items: (Weapon)[]) {
+    constructor(name: string, value: number, weight: number, isSpoiled: boolean) {
+        super('pizza', value, weight, isSpoiled);
+
+        this.slices = 6;
+    }
+
+    eat(): string {
+        if (this.isConsumed) return `There is nothing left of the ${this.name} to consume.`;
+
+        this.slices--;
+        if (this.slices <= 0) this.isConsumed = true;
+        const consumedText = this.isConsumed ? ` No more left` : '';
+
+        return `You eat slice of ${this.name}.${consumedText}`;
+    }
+}
+
+class Inventory {
+    items: Item[];
+
+    constructor(items: Item[]) {
         this.items = items;
     }
 
@@ -198,9 +220,3 @@ class Inventory {
         return itemsDescriptions.join(", ");
     }
 }
-
-const inventory = new Inventory([new Sword(3000, 10, 20, 0.5, 0.8, 0.5), new Sword(2000, 30, 20, 0.5, 0.8, 0.5), new Bow(1000, 20, 20, 0.5, 0.8, 0.5)]);
-
-inventory.sort(new ItemWeightComparator);
-
-console.log(inventory.items);
