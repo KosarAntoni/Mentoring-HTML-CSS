@@ -6,11 +6,10 @@ interface Comparable {
 }
 
 interface Comparator {
-
 }
 
 interface ItemComparator extends Comparator {
-
+    compare(first: Item, second: Item): -1 | 1;
 }
 
 abstract class Item implements Comparable {
@@ -37,9 +36,9 @@ abstract class Item implements Comparable {
     public compareTo(other: Item) {
         if (!other) throw new Error('Item required!')
 
-        if (this.value !== other.value) return this.value > other.value ? 1 : -1;
+        if (this.value === other.value) return this.name.toLowerCase() < other.name.toLowerCase() ? 1 : -1;
 
-        return this.name.toLowerCase() < other.name.toLowerCase() ? 1 : -1;
+        return this.value > other.value ? 1 : -1;
 
     }
 
@@ -57,7 +56,13 @@ abstract class Weapon {
 }
 
 class ItemWeightComparator implements ItemComparator {
+    compare(first: Item, second: Item) {
+        if (!first || !second) throw new Error('Items required!')
 
+        if (first.weight === second.weight) return first.compareTo(second)
+
+        return first.weight > second.weight ? 1 : -1;
+    }
 }
 
 class Ring extends Item {
@@ -68,8 +73,12 @@ class Ring extends Item {
 
 const ring = new Ring('golden ring a', 20);
 const ring2 = new Ring('golden ring b', 30);
+const ring3 = new Ring('golden ring b', 30, 0.2);
+const weightComparator = new ItemWeightComparator;
 
-console.log(ring.toString(), ring.id)
-console.log(ring2.toString(), ring2.id)
+console.log(ring.toString(), ring.id);
+console.log(ring2.toString(), ring2.id);
 
 console.log(ring.compareTo(ring2));
+
+console.log(weightComparator.compare(ring, ring3));
