@@ -1,5 +1,5 @@
-type pageType = 'with text' | 'with article' | 'with images' | 'with some content';
-type pageMaterial = 'simple paper' | 'glossy paper' | 'paper';
+export type pageType = 'with text' | 'with article' | 'with images' | 'with some content';
+export type pageMaterial = 'simple paper' | 'glossy paper' | 'paper';
 
 export class Page {
     pageNumber: number;
