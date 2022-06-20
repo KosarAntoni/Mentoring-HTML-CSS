@@ -16,6 +16,7 @@ export class Book extends PagesFactory {
     get author() {
         return this._author;
     }
+
     toString(): string {
         return `Book: ${this.title} by ${this.author} with number of pages: ${this.pages.pages.length}`;
     }

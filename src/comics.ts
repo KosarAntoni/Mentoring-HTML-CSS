@@ -27,6 +27,6 @@ export class Comics extends PagesFactory {
     }
 
     toString(): string {
-        return `Book: ${this.title} by ${this.author} with number of pages: ${this.pages.pages.length}`;
+        return `Comics: ${this.title} by ${this.author}, the artist is ${this.artist}, number of pages: ${this.pages.pages.length}`;
     }
 }
