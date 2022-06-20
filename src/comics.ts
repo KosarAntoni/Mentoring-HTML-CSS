@@ -1,13 +1,15 @@
 import { Pages } from "./pages";
 import { PagesFactory } from "./pagesFactory";
 
-export class Book extends PagesFactory {
+export class Comics extends PagesFactory {
     _author: string;
+    _artist: string;
 
-    constructor(title: string, author: string, pages: Pages) {
+    constructor(title: string, author: string, artist: string, pages: Pages) {
         super(title, pages);
 
         this._author = author;
+        this._artist = artist;
     }
 
     set author(value: string) {
@@ -16,6 +18,14 @@ export class Book extends PagesFactory {
     get author() {
         return this._author;
     }
+
+    set artist(value: string) {
+        this._artist = value;
+    }
+    get artist() {
+        return this._artist;
+    }
+
     toString(): string {
         return `Book: ${this.title} by ${this.author} with number of pages: ${this.pages.pages.length}`;
     }
