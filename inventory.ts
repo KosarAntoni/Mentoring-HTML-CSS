@@ -1,3 +1,14 @@
+const MODIFIER_CHANGE_RATE = 0.1;
+const MAX_DAMAGE_MULTIPLIER = 0.25;
+
+const compare = (a: string | number, b: string | number) => a > b ? 1 : -1;
+const setPolish = (modifier: number, maxValue: number) => {
+    if (modifier < maxValue) {
+        const newValue = modifier + MODIFIER_CHANGE_RATE;
+        modifier = newValue > maxValue ? maxValue : newValue;
+    }
+}
+
 interface Comparable {
     name: string;
     value: number;
@@ -28,7 +39,6 @@ abstract class Item implements Comparable {
 
     static counter: number = 0;
 
-
     public reset() {
         Item.counter = 0;
     }
@@ -36,10 +46,9 @@ abstract class Item implements Comparable {
     public compareTo(other: Item) {
         if (!other) throw new Error('Item required!')
 
-        if (this.value === other.value) return this.name.toLowerCase() < other.name.toLowerCase() ? 1 : -1;
+        if (this.value === other.value) return compare(this.name.toLowerCase(), other.name.toLowerCase());
 
-        return this.value > other.value ? 1 : -1;
-
+        return compare(this.value, other.value);
     }
 
     public toString(): string {
@@ -68,7 +77,6 @@ abstract class Consumable extends Item {
         const spoiledText = this.isSpoiled ? ' You feel sick.' : '';
 
         return `${this.eat()}${spoiledText}`;
-
     }
 }
 
@@ -78,7 +86,6 @@ abstract class Weapon extends Item {
     baseDurability: number;
     durabilityModifier: number;
     isBroken: boolean;
-    MODIFIER_CHANGE_RATE: number;
 
     constructor(name: string,
         value: number,
@@ -96,7 +103,6 @@ abstract class Weapon extends Item {
         this.durabilityModifier = durabilityModifier;
 
         this.isBroken = false;
-        this.MODIFIER_CHANGE_RATE = 0.1;
     }
 
     public getDamage(): number {
@@ -117,7 +123,7 @@ abstract class Weapon extends Item {
     public use(): string {
         if (this.isBroken) return `You can't use the ${this.name}, it is broken.`
 
-        this.baseDurability = this.baseDurability - this.MODIFIER_CHANGE_RATE;
+        this.baseDurability = this.baseDurability - MODIFIER_CHANGE_RATE;
 
         if (this.baseDurability <= 0) this.isBroken = true;
         const damage = this.getDamage().toFixed(2);
@@ -133,7 +139,7 @@ class ItemWeightComparator implements ItemComparator {
 
         if (first.weight === second.weight) return first.compareTo(second)
 
-        return first.weight > second.weight ? 1 : -1;
+        return compare(first.weight, second.weight);
     }
 }
 
@@ -145,16 +151,13 @@ class Sword extends Weapon {
         baseDurability: number,
         durabilityModifier: number
     ) {
-        super('sword', value, weight, baseDamage, damageModifier, baseDurability, durabilityModifier)
+        super('sword', value, weight, baseDamage, damageModifier, baseDurability, durabilityModifier);
     }
 
     public polish() {
-        const maxValue = this.baseDamage * 0.25;
+        const maxValue = this.baseDamage * MAX_DAMAGE_MULTIPLIER;
 
-        if (this.damageModifier < maxValue) {
-            const newValue = this.damageModifier + this.MODIFIER_CHANGE_RATE;
-            this.damageModifier = newValue > maxValue ? maxValue : newValue;
-        }
+        setPolish(this.damageModifier, maxValue);
     }
 }
 
@@ -172,17 +175,14 @@ class Bow extends Weapon {
     public polish() {
         const maxValue = 1;
 
-        if (this.durabilityModifier < maxValue) {
-            const newValue = this.durabilityModifier + this.MODIFIER_CHANGE_RATE;
-            this.durabilityModifier = newValue > maxValue ? maxValue : newValue;
-        }
+        setPolish(this.durabilityModifier, maxValue);
     }
 }
 
 class Pizza extends Consumable {
     slices: number;
 
-    constructor(name: string, value: number, weight: number, isSpoiled: boolean) {
+    constructor(value: number, weight: number, isSpoiled: boolean) {
         super('pizza', value, weight, isSpoiled);
 
         this.slices = 6;
