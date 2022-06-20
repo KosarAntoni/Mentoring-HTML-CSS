@@ -19,8 +19,5 @@ export abstract class PagesFactory extends Item {
         return this._title;
     }
 
-
     abstract toString(): string
 }
-
-
