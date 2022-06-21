@@ -1,10 +1,9 @@
 type packageType = {
+    weight: number;
     marks: string[];
-} & Record<'toAddress' | 'fromAddress' | 'toZipCode' | 'fromZipCode', string>
-    & Record<'shipmentId' | 'weight', number>;
+} & Record<'toAddress' | 'fromAddress' | 'toZipCode' | 'fromZipCode', string>;
 
 const mock: packageType = {
-    shipmentId: 17263,
     weight: 20,
     fromZipCode: '92021',
     fromAddress: '12292 4th Ave SE, Bellevue, Wa',
@@ -13,6 +12,20 @@ const mock: packageType = {
     marks: ['MARK FRAGILE', 'MARK DO NOT LEAVE IF ADDRESS NOT AT HOME', 'MARK RETURN RECEIPT REQUESTED'],
 };
 
+class ShipmentId {
+    static id: number = 0;
+
+    getShipmentID(): number {
+        const value = ShipmentId.id;
+        ShipmentId.id++;
+        return value;
+    }
+
+    reset(): void {
+        ShipmentId.id = 0;
+    }
+}
+
 class Shipment {
     private _package: packageType;
 
@@ -20,12 +33,18 @@ class Shipment {
         this._package = clientPackage;
     }
 
+    getId(): number {
+        const idGenerator = new ShipmentId();
+        return idGenerator.getShipmentID();
+    }
+
     getCost(): number {
         return this._package.weight * 0.39;
     }
 
     ship() {
-        const { shipmentId, fromZipCode, fromAddress, toZipCode, toAddress, marks } = this._package;
+        const { fromZipCode, fromAddress, toZipCode, toAddress, marks } = this._package;
+        const shipmentId = this.getId();
         const cost = this.getCost();
         const formattedMarks = marks
             .map((mark, index) => index === marks.length - 1 ? `**${mark.toUpperCase()}**` : `**${mark.toUpperCase()}**\n`)
