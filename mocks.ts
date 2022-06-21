@@ -1,7 +1,22 @@
-import { packageType, shipperType } from "./models";
+import { packageType, packageTypeType, shipperType } from "./models";
+
+export const packageTypes: packageTypeType[] = [
+    {
+        maxWeight: 15,
+        name: 'Letter'
+    },
+    {
+        maxWeight: 160,
+        name: 'Package'
+    },
+    {
+        maxWeight: Infinity,
+        name: 'Oversized'
+    }
+]
 
 export const mock: packageType = {
-    weight: 20,
+    weight: 180,
     fromZipCode: '92021',
     fromAddress: '12292 4th Ave SE, Bellevue, Wa',
     toZipCode: '67721',
@@ -14,19 +29,57 @@ export const shippers: shipperType[] = [
         zipCode: [1, 2, 3],
         name: 'Air East',
         base: 'Atlanta',
-        cost: 39
+        cost: [
+            {
+                formula: (weight: number) => weight * 0.39,
+                name: 'Letter'
+            },
+            {
+                formula: (weight: number) => weight * 0.25,
+                name: 'Package'
+            },
+            {
+                formula: (weight: number) => 10 + (weight * 0.25),
+                name: 'Oversized'
+            }
+        ]
     },
     {
         zipCode: [4, 5, 6],
         name: 'Chicago Sprint',
         base: 'a suburb of Chicago',
-        cost: 42
-
+        cost: [
+            {
+                formula: (weight: number) => weight * 0.42,
+                name: 'Letter'
+            },
+            {
+                formula: (weight: number) => weight * 0.20,
+                name: 'Package'
+            },
+            {
+                formula: (weight: number) => weight * 0.20,
+                name: 'Oversized'
+            }
+        ]
     },
     {
         zipCode: [7, 8, 9],
         name: 'Pacific Parcel',
         base: 'San Diego',
-        cost: 51
+        cost: [
+            {
+                formula: (weight: number) => weight * 0.51,
+                name: 'Letter'
+            },
+            {
+                formula: (weight: number) => weight * 0.19,
+                name: 'Package'
+            },
+            {
+                formula: (weight: number) => weight * 0.21,
+                name: 'Oversized'
+            }
+        ]
     },
 ]

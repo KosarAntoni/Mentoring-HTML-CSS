@@ -1,5 +1,5 @@
-import { mock, shippers } from "./mocks";
-import { packageType, shipperType } from "./models";
+import { mock, packageTypes, shippers } from "./mocks";
+import { packageType, packageTypeType, shipperType } from "./models";
 
 class ShipmentId {
     static id: number = 0;
@@ -14,7 +14,6 @@ class ShipmentId {
         ShipmentId.id = 0;
     }
 }
-
 class Shipper {
     private _shippers: shipperType[];
 
@@ -23,13 +22,14 @@ class Shipper {
         this._shippers = shippers;
     }
 
-    getShipper(packageZipCode: string): shipperType {
-        return this._shippers.filter(({ zipCode }) => zipCode.includes(+packageZipCode.charAt(0)))[0];
+    getShipper(packageZipCode: string): shipperType | undefined {
+        return this._shippers.find(({ zipCode }) => zipCode.includes(+packageZipCode.charAt(0)));
     }
 
-    getCost(packageWeight: number, packageZipCode: string): number {
+    getCost(type: packageTypeType, packageZipCode: string, packageWeight: number): number {
         const shipper = this.getShipper(packageZipCode);
-        return shipper.cost * packageWeight;
+        const costFormula = shipper?.cost.find(({ name }) => name === type.name)?.formula;
+        return shipper && costFormula ? costFormula(packageWeight) : 0;
     }
 }
 
@@ -45,15 +45,22 @@ class Shipment {
         return idGenerator.getShipmentID();
     }
 
+    getType(): packageTypeType {
+        const { weight } = this._package;
+        return packageTypes.find(({ maxWeight }) => weight < maxWeight)!;
+    }
+
     getCost(): number {
         const { weight, toZipCode } = this._package;
         const shipper = new Shipper();
-        return shipper.getCost(weight, toZipCode)
+        const type = this.getType()
+        return shipper.getCost(type, toZipCode, weight)
     }
 
     ship() {
         const { fromZipCode, fromAddress, toZipCode, toAddress, marks } = this._package;
         const shipmentId = this.getId();
+        const type = this.getType();
         const cost = this.getCost();
         const formattedMarks = marks
             .map((mark, index) => index === marks.length - 1 ? `**${mark.toUpperCase()}**` : `**${mark.toUpperCase()}**\n`)
