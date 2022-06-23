@@ -4,5 +4,69 @@
     <meta charset="UTF-8" />
     <title>Patterns of patterns</title>
   </head>
-  <body></body>
+  <body>
+    <h1>Exchenge</h1>
+    <fieldset>
+      <legend>Input mode:</legend>
+
+      <div>
+        <input type="radio" id="all" name="mode" value="all" checked />
+        <label for="all">All</label>
+      </div>
+
+      <div>
+        <input type="radio" id="idependent" name="mode" value="idependent" />
+        <label for="idependent">Idependent</label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Input view:</legend>
+
+      <div>
+        <input type="radio" id="text" name="view" value="text" checked />
+        <label for="text">Text</label>
+      </div>
+
+      <div>
+        <input type="radio" id="sliders" name="view" value="sliders" />
+        <label for="sliders">Sliders</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>USD</legend>
+      <div>
+        <label for="usd">1 EUR is</label>
+        <input type="text" id="usd" disabled />
+        <span> USD</span>
+      </div>
+
+      <span>
+        <label for="eur-usd">EUR</label>
+        <input type="text" id="eur-usd" />
+      </span>
+      <span>
+        <label for="usd-eur">USD</label>
+        <input type="text" id="usd-eur" />
+      </span>
+    </fieldset>
+
+    <fieldset>
+      <legend>USD</legend>
+      <div>
+        <label for="usd">1 EUR is</label>
+        <input type="text" id="usd" disabled />
+        <span> USD</span>
+      </div>
+
+      <span>
+        <label for="eur-usd">EUR</label>
+        <input type="range" min="0" max="1000" id="eur-usd" />
+      </span>
+      <span>
+        <label for="usd-eur">USD</label>
+        <input type="range" min="0" max="1000" id="usd-eur" />
+      </span>
+    </fieldset>
+  </body>
 </html>
