@@ -1,5 +1,7 @@
 import { state, stateKeys } from "./models";
 
+const INITIAL_VALUE = 1;
+
 const URL = "./rates.json";
 // const URL = "https://api.exchangerate.host/latest?base=EUR&symbols=USD,PLN,RUB";
 
@@ -79,23 +81,24 @@ const renderTextField = (
   const ratesWrapperNode = document.createElement("div");
   const isRateFieldDisabled = state.mode === "all";
 
-  const baseRateId = `${baseRate.toLowerCase()} - ${rate.toLowerCase()}`;
+  const baseRateId = `${baseRate.toLowerCase()}-${rate.toLowerCase()}`;
   const baseRateNode = renderTextInput(
     baseRateId,
     baseRate,
     "span",
-    "1",
+    INITIAL_VALUE,
     isRateFieldDisabled
   );
   ratesWrapperNode.appendChild(baseRateNode);
   const baseRateInput = baseRateNode.querySelector("input");
 
-  const rateId = `${rate.toLowerCase()} - ${baseRate.toLowerCase()}`;
+  const rateInitialValue = INITIAL_VALUE * exchangeRate;
+  const rateId = `${rate.toLowerCase()}-${baseRate.toLowerCase()}`;
   const rateNode = renderTextInput(
     rateId,
     rate,
     "span",
-    exchangeRate,
+    rateInitialValue,
     isRateFieldDisabled
   );
   const rateInput = rateNode.querySelector("input");
@@ -124,6 +127,7 @@ const radioNodes = document.querySelectorAll('input[type="radio"]');
 radioNodes.forEach((node) => node.addEventListener("input", handleRadioClick));
 
 const renderMainTextInput = (baseRate: string) => {
+  state.allValue = "1";
   const fieldsetNode = document.createElement("fieldset");
 
   const legendNode = document.createElement("legend");
@@ -131,8 +135,7 @@ const renderMainTextInput = (baseRate: string) => {
   fieldsetNode.appendChild(legendNode);
 
   const id = baseRate.toLowerCase();
-  const headerNode = renderTextInput(id, baseRate, "div", "1");
-
+  const headerNode = renderTextInput(id, baseRate, "div", state.allValue);
   fieldsetNode.appendChild(headerNode);
 
   return fieldsetNode;
@@ -142,15 +145,40 @@ const renderTextContent = async (node: HTMLElement) => {
   const data = await getData();
   const { rates, base } = data;
 
+  const wrapperNode = document.createElement("div");
+
+  Object.keys(rates).forEach((rate: string) => {
+    const rateNode = renderTextField(base, rate, rates[rate]);
+    wrapperNode.appendChild(rateNode);
+  });
+
   if (state.mode === "all") {
-    const inputNode = renderMainTextInput(base);
-    node.appendChild(inputNode);
+    const fieldNode = renderMainTextInput(base);
+    const inputNode = fieldNode.querySelector("input");
+    inputNode?.addEventListener("input", (e) => {
+      const target = e?.target as HTMLInputElement;
+
+      const baseNodes = wrapperNode.querySelectorAll(
+        `input[id^=${base.toLowerCase()}-]`
+      ) as unknown as HTMLInputElement[];
+
+      baseNodes.forEach((node) => {
+        node.value = target.value;
+      });
+
+      const exchangeNodes = wrapperNode.querySelectorAll(
+        `input[id$=-${base.toLowerCase()}]`
+      ) as unknown as HTMLInputElement[];
+
+      exchangeNodes.forEach((node) => {
+        const rate = rates[node.id.slice(0, 3).toUpperCase()];
+        node.value = (+target.value * rate).toString();
+      });
+    });
+    node.appendChild(fieldNode);
   }
 
-  Object.keys(rates).forEach((rate) => {
-    const rateNode = renderTextField(base, rate, rates[rate]);
-    node.appendChild(rateNode);
-  });
+  node.appendChild(wrapperNode);
 };
 
 const renderContent = () => {
