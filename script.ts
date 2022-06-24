@@ -1,5 +1,14 @@
 import { state, stateKeys } from "./models";
 
+const URL = "./rates.json";
+// const URL = "https://api.exchangerate.host/latest?base=EUR&symbols=USD,PLN,RUB";
+
+const getData = async () => {
+  const response = await fetch(URL);
+  const data = await response.json();
+  return data;
+};
+
 const state: state = {};
 
 const setInitialValue = (value: stateKeys) => {
@@ -18,6 +27,8 @@ const handleRadioClick = (e: Event) => {
   }
 };
 
+const renderTextFields = () => {};
+
 if (!state.mode) {
   setInitialValue("mode");
 }
@@ -26,7 +37,7 @@ if (!state.view) {
   setInitialValue("view");
 }
 
-const modeNodes = document.querySelectorAll('input[type="radio"]');
-modeNodes.forEach((node) =>
+const radioNodes = document.querySelectorAll('input[type="radio"]');
+radioNodes.forEach((node) =>
   node.addEventListener("mousedown", handleRadioClick)
 );
