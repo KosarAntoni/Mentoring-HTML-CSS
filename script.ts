@@ -19,15 +19,12 @@ const setInitialValue = (value: stateKeys) => {
 };
 
 const handleRadioClick = (e: Event) => {
-  const mainNode = document.querySelector("main")!;
-  mainNode.innerHTML = "";
-  renderTextFields();
-
   const target = e?.target as HTMLInputElement;
   if (target.name && target.value) {
     const key = target.name as stateKeys;
     state[key] = target.value;
   }
+  renderContent();
 };
 
 const renderTextInput = (
@@ -124,20 +121,45 @@ if (!state.view) {
 }
 
 const radioNodes = document.querySelectorAll('input[type="radio"]');
-radioNodes.forEach((node) =>
-  node.addEventListener("mousedown", handleRadioClick)
-);
+radioNodes.forEach((node) => node.addEventListener("input", handleRadioClick));
 
-const renderTextFields = async () => {
-  const mainNode = document.querySelector("main");
+const renderMainTextInput = (baseRate: string) => {
+  const fieldsetNode = document.createElement("fieldset");
+
+  const legendNode = document.createElement("legend");
+  legendNode.innerText = baseRate;
+  fieldsetNode.appendChild(legendNode);
+
+  const id = baseRate.toLowerCase();
+  const headerNode = renderTextInput(id, baseRate, "div", "1");
+
+  fieldsetNode.appendChild(headerNode);
+
+  return fieldsetNode;
+};
+
+const renderTextContent = async (node: HTMLElement) => {
   const data = await getData();
-
   const { rates, base } = data;
+
+  if (state.mode === "all") {
+    const inputNode = renderMainTextInput(base);
+    node.appendChild(inputNode);
+  }
 
   Object.keys(rates).forEach((rate) => {
     const rateNode = renderTextField(base, rate, rates[rate]);
-    mainNode?.appendChild(rateNode);
+    node.appendChild(rateNode);
   });
 };
 
-renderTextFields();
+const renderContent = () => {
+  const mainNode = document.querySelector("main")!;
+  mainNode.innerHTML = "";
+
+  if (state.view === "text") {
+    renderTextContent(mainNode);
+  }
+};
+
+renderContent();
