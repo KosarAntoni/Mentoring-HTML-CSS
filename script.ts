@@ -61,7 +61,6 @@ const renderRangeInput = (
   maxValue: number = MAX_VALUE
 ) => {
   const wrapperNode = document.createElement("span");
-  console.log(maxValue);
 
   const inputNode = document.createElement("input");
   inputNode.setAttribute("type", "range");
@@ -147,22 +146,18 @@ const renderField = (
   const rateNode = (() => {
     switch (type) {
       case "number":
-        return renderNumberInput(
-          rateId,
-          rate,
-          rateInitialValue,
-          isRateFieldDisabled
-        );
+        return renderNumberInput(rateId, rate, rateInitialValue, true);
       case "range":
-        return renderRangeInput(
+        const node = renderRangeInput(
           rateId,
           rate,
           rateInitialValue,
-          isRateFieldDisabled,
+          true,
           maxValue
         );
+        return node;
       default:
-        renderNumberInput(rateId, rate, rateInitialValue, isRateFieldDisabled);
+        renderNumberInput(rateId, rate, rateInitialValue, true);
     }
   })();
   const rateInput = rateNode!.querySelector("input");
@@ -172,6 +167,21 @@ const renderField = (
     const target = e?.target as HTMLInputElement;
 
     rateInput!.value = (+target.value * exchangeRate).toString();
+    (() => {
+      switch (type) {
+        case "range":
+          const baseLabel = baseRateNode?.querySelector("label");
+          baseLabel!.innerText = `${baseLabel?.dataset.name}: ${target.value}`;
+          const rateLabel = rateNode!.querySelector("label");
+          const labelText = `${rateLabel?.dataset.name}: ${
+            +target.value * exchangeRate
+          }`;
+          rateLabel!.innerText = labelText;
+          break;
+        default:
+          break;
+      }
+    })();
   });
 
   fieldsetNode.appendChild(ratesWrapperNode);
