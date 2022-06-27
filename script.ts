@@ -1,6 +1,7 @@
 import { state, stateKeys } from "./models";
 
 const INITIAL_VALUE = 1;
+const MAX_VALUE = 1000;
 
 const URL = "./rates.json";
 // const URL = "https://api.exchangerate.host/latest?base=EUR&symbols=USD,PLN,RUB";
@@ -29,10 +30,9 @@ const handleRadioClick = (e: Event) => {
   renderContent();
 };
 
-const renderTextInput = (
+const renderNumberInput = (
   id: string,
   label: string,
-  element: string,
   value?: string | number,
   isDisabled?: boolean
 ) => {
@@ -53,10 +53,42 @@ const renderTextInput = (
   return wrapperNode;
 };
 
-const renderTextField = (
+const renderRangeInput = (
+  id: string,
+  label: string,
+  value?: string | number,
+  isDisabled?: boolean,
+  maxValue: number = MAX_VALUE
+) => {
+  const wrapperNode = document.createElement("span");
+  console.log(maxValue);
+
+  const inputNode = document.createElement("input");
+  inputNode.setAttribute("type", "range");
+  inputNode.setAttribute("min", "0");
+  inputNode.setAttribute("max", maxValue.toString());
+  inputNode.setAttribute("id", id);
+  if (isDisabled) inputNode.setAttribute("disabled", "true");
+  if (value) inputNode.value = value.toString();
+
+  const labelNode = document.createElement("label");
+  labelNode.setAttribute("for", id);
+  labelNode.setAttribute("data-name", label);
+  labelNode.innerText = `${label}: ${inputNode.value}`;
+  labelNode.style.display = "block";
+
+  wrapperNode.appendChild(labelNode);
+  wrapperNode.appendChild(inputNode);
+
+  return wrapperNode;
+};
+
+const renderField = (
   baseRate: string,
   rate: string,
-  exchangeRate: number
+  exchangeRate: number,
+  type: "number" | "range" = "number",
+  maxValue?: number
 ) => {
   const fieldsetNode = document.createElement("fieldset");
 
@@ -66,10 +98,9 @@ const renderTextField = (
 
   const headerId = baseRate.toLowerCase();
   const headerLabel = `1 ${baseRate} is `;
-  const headerNode = renderTextInput(
+  const headerNode = renderNumberInput(
     headerId,
     headerLabel,
-    "div",
     exchangeRate,
     true
   );
@@ -82,28 +113,61 @@ const renderTextField = (
   const isRateFieldDisabled = state.mode === "all";
 
   const baseRateId = `${baseRate.toLowerCase()}-${rate.toLowerCase()}`;
-  const baseRateNode = renderTextInput(
-    baseRateId,
-    baseRate,
-    "span",
-    INITIAL_VALUE,
-    isRateFieldDisabled
-  );
-  ratesWrapperNode.appendChild(baseRateNode);
-  const baseRateInput = baseRateNode.querySelector("input");
+  const baseRateNode = (() => {
+    switch (type) {
+      case "number":
+        return renderNumberInput(
+          baseRateId,
+          baseRate,
+          INITIAL_VALUE,
+          isRateFieldDisabled
+        );
+      case "range":
+        return renderRangeInput(
+          baseRateId,
+          baseRate,
+          INITIAL_VALUE,
+          isRateFieldDisabled
+        );
+      default:
+        renderNumberInput(
+          baseRateId,
+          baseRate,
+          INITIAL_VALUE,
+          isRateFieldDisabled
+        );
+    }
+  })();
+  ratesWrapperNode.appendChild(baseRateNode!);
+  const baseRateInput = baseRateNode!.querySelector("input");
 
   const rateInitialValue = INITIAL_VALUE * exchangeRate;
   const rateId = `${rate.toLowerCase()}-${baseRate.toLowerCase()}`;
-  const rateNode = renderTextInput(
-    rateId,
-    rate,
-    "span",
-    rateInitialValue,
-    isRateFieldDisabled
-  );
-  const rateInput = rateNode.querySelector("input");
 
-  ratesWrapperNode.appendChild(rateNode);
+  const rateNode = (() => {
+    switch (type) {
+      case "number":
+        return renderNumberInput(
+          rateId,
+          rate,
+          rateInitialValue,
+          isRateFieldDisabled
+        );
+      case "range":
+        return renderRangeInput(
+          rateId,
+          rate,
+          rateInitialValue,
+          isRateFieldDisabled,
+          maxValue
+        );
+      default:
+        renderNumberInput(rateId, rate, rateInitialValue, isRateFieldDisabled);
+    }
+  })();
+  const rateInput = rateNode!.querySelector("input");
+
+  ratesWrapperNode.appendChild(rateNode!);
   baseRateInput?.addEventListener("input", (e) => {
     const target = e?.target as HTMLInputElement;
 
@@ -126,7 +190,10 @@ if (!state.view) {
 const radioNodes = document.querySelectorAll('input[type="radio"]');
 radioNodes.forEach((node) => node.addEventListener("input", handleRadioClick));
 
-const renderMainTextInput = (baseRate: string) => {
+const renderMainTextInput = (
+  baseRate: string,
+  type: "number" | "range" = "number"
+) => {
   state.allValue = "1";
   const fieldsetNode = document.createElement("fieldset");
 
@@ -135,8 +202,18 @@ const renderMainTextInput = (baseRate: string) => {
   fieldsetNode.appendChild(legendNode);
 
   const id = baseRate.toLowerCase();
-  const headerNode = renderTextInput(id, baseRate, "div", state.allValue);
-  fieldsetNode.appendChild(headerNode);
+  const headerNode = (() => {
+    switch (type) {
+      case "number":
+        return renderNumberInput(id, baseRate, state.allValue);
+      case "range":
+        return renderRangeInput(id, baseRate, state.allValue);
+      default:
+        renderNumberInput(id, baseRate, state.allValue);
+    }
+  })();
+
+  fieldsetNode.appendChild(headerNode!);
 
   return fieldsetNode;
 };
@@ -148,7 +225,7 @@ const renderTextContent = async (node: HTMLElement) => {
   const wrapperNode = document.createElement("div");
 
   Object.keys(rates).forEach((rate: string) => {
-    const rateNode = renderTextField(base, rate, rates[rate]);
+    const rateNode = renderField(base, rate, rates[rate]);
     wrapperNode.appendChild(rateNode);
   });
 
@@ -181,12 +258,74 @@ const renderTextContent = async (node: HTMLElement) => {
   node.appendChild(wrapperNode);
 };
 
+const renderSlidersContent = async (node: HTMLElement) => {
+  const data = await getData();
+  const { rates, base } = data;
+
+  const wrapperNode = document.createElement("div");
+
+  Object.keys(rates).forEach((rate: string) => {
+    const maxValue = MAX_VALUE * rates[rate];
+    const rateNode = renderField(base, rate, rates[rate], "range", maxValue);
+    wrapperNode.appendChild(rateNode);
+  });
+
+  if (state.mode === "all") {
+    const fieldNode = renderMainTextInput(base, "range");
+    const inputNode = fieldNode.querySelector("input");
+    inputNode?.addEventListener("input", (e) => {
+      const target = e?.target as HTMLInputElement;
+
+      const baseNodesInputs = wrapperNode.querySelectorAll(
+        `input[id^=${base.toLowerCase()}-]`
+      ) as unknown as HTMLInputElement[];
+
+      baseNodesInputs.forEach((node) => {
+        node.value = target.value;
+      });
+
+      const baseNodesLabels = wrapperNode.querySelectorAll(
+        `label[for^=${base.toLowerCase()}-]`
+      ) as unknown as HTMLInputElement[];
+
+      baseNodesLabels.forEach((node) => {
+        node.innerText = `${base}: ${target.value}`;
+      });
+
+      const exchangeNodesInputs = wrapperNode.querySelectorAll(
+        `input[id$=-${base.toLowerCase()}]`
+      ) as unknown as HTMLInputElement[];
+
+      exchangeNodesInputs.forEach((node) => {
+        const rate = rates[node.id.slice(0, 3).toUpperCase()];
+        node.value = (+target.value * rate).toString();
+      });
+
+      const exchangeNodesLabels = wrapperNode.querySelectorAll(
+        `label[for$=-${base.toLowerCase()}]`
+      ) as unknown as HTMLInputElement[];
+
+      exchangeNodesLabels.forEach((node) => {
+        const rate = rates[node.dataset.name!];
+        node.innerText = `${node.dataset.name}: ${+target.value * rate}`;
+      });
+    });
+    node.appendChild(fieldNode);
+  }
+
+  node.appendChild(wrapperNode);
+};
+
 const renderContent = () => {
   const mainNode = document.querySelector("main")!;
   mainNode.innerHTML = "";
 
   if (state.view === "text") {
     renderTextContent(mainNode);
+  }
+
+  if (state.view === "sliders") {
+    renderSlidersContent(mainNode);
   }
 };
 
