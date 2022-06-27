@@ -3,8 +3,7 @@ import { state, stateKeys } from "./models";
 const INITIAL_VALUE = 1;
 const MAX_VALUE = 1000;
 
-const URL = "./rates.json";
-// const URL = "https://api.exchangerate.host/latest?base=EUR&symbols=USD,PLN,RUB";
+const URL = "https://api.exchangerate.host/latest?base=EUR&symbols=USD,PLN,RUB";
 
 const getData = async () => {
   const response = await fetch(URL);
