@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Patterns of patterns</title>
+  </head>
+  <body>
+    <h1>Exchenge</h1>
+    <fieldset id="mode">
+      <legend>Input mode:</legend>
+
+      <div>
+        <input type="radio" id="all" name="mode" value="all" checked />
+        <label for="all">All</label>
+      </div>
+
+      <div>
+        <input type="radio" id="idependent" name="mode" value="idependent" />
+        <label for="idependent">Idependent</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Input view:</legend>
+
+      <div>
+        <input type="radio" id="text" name="view" value="text" checked />
+        <label for="text">Text</label>
+      </div>
+
+      <div>
+        <input type="radio" id="sliders" name="view" value="sliders" />
+        <label for="sliders">Sliders</label>
+      </div>
+    </fieldset>
+
+    <main></main>
+    <script>
+      var exports = {};
+    </script>
+    <script src="dist/script.js"></script>
+  </body>
+</html>
