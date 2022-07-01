@@ -54,13 +54,11 @@ class Graph {
     distance[startIndex] = 0;
 
     this.graph.forEach((row, rowIndex) => {
-      if (distance[rowIndex] < Infinity) {
-        row.forEach((cell, cellIndex) => {
-          if (cell !== 0 && cell + distance[rowIndex] < distance[cellIndex]) {
-            distance[cellIndex] = cell + distance[rowIndex];
-          }
-        });
-      }
+      row.forEach((cell, cellIndex) => {
+        if (cell !== 0 && cell + distance[rowIndex] < distance[cellIndex]) {
+          distance[cellIndex] = cell + distance[rowIndex];
+        }
+      });
     });
     return distance;
   }
