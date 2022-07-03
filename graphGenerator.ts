@@ -23,9 +23,6 @@ class Graph {
   }
 
   addEdge(from: string, to: string, weight: number) {
-    const formatedFrom = from.toUpperCase();
-    const formatedTo = to.toUpperCase();
-
     if (!(from in this.verticesNames)) {
       throw new Error(`Vertex ${from} doesn't exist`);
     }
@@ -47,20 +44,35 @@ class Graph {
   }
 
   dijkstra(start: string) {
-    const startIndex = this.verticesNames[start];
     const graphLength = this.graph.length;
+    const startIndex = this.verticesNames[start];
+    const distances = new Array(graphLength).fill(Infinity);
+    const visitedVertecies: number[] = [];
 
-    const distance = new Array(graphLength).fill(Infinity);
-    distance[startIndex] = 0;
+    distances[startIndex] = 0;
 
-    this.graph.forEach((row, rowIndex) => {
-      row.forEach((cell, cellIndex) => {
-        if (cell !== 0 && cell + distance[rowIndex] < distance[cellIndex]) {
-          distance[cellIndex] = cell + distance[rowIndex];
+    for (let vertex = 0; vertex < graphLength; vertex++) {
+      const currentIndex: number = distances.findIndex(
+        (index) =>
+          index ===
+          distances.reduce((acc, item, distanceIndex) => {
+            return !visitedVertecies.includes(distanceIndex) && item < acc
+              ? item
+              : acc;
+          }, Infinity)
+      );
+
+      this.graph[currentIndex].forEach((path, index) => {
+        if (path !== 0) {
+          if (distances[index] > path + distances[currentIndex]) {
+            distances[index] = path + distances[currentIndex];
+          }
         }
       });
-    });
-    return distance;
+      visitedVertecies.push(currentIndex);
+    }
+
+    return distances;
   }
 
   getShortest(from: string, to: string) {
@@ -68,7 +80,7 @@ class Graph {
     const dijkstraResult = this.dijkstra(from);
     const shortestPath = dijkstraResult[toIndex];
 
-    if (shortestPath === Infinity) {
+    if (shortestPath === Infinity || !shortestPath) {
       return `No path from ${from} to ${to}`;
     }
 
