@@ -129,7 +129,7 @@ Object.keys(verticesNames).forEach((vertex: string, index: number) => {
     (graphContainerWidth + graphContainerWidth * Math.sin(position)) / 2
   );
 
-  const groupeNode = document.createElementNS(svgNS, "g");
+  const groupeNode = document.createElementNS(svgNS, "g") as HTMLElement;
   groupeNode.style.cursor = "pointer";
   groupeNode.addEventListener("mousedown", () => console.log("click"));
 
@@ -145,7 +145,7 @@ Object.keys(verticesNames).forEach((vertex: string, index: number) => {
 
   groupeNode.appendChild(circleNode);
 
-  const textNode = document.createElementNS(svgNS, "text");
+  const textNode = document.createElementNS(svgNS, "text") as HTMLElement;
   textNode.innerHTML = vertex;
   textNode.setAttribute("x", String(+x - circleRadius / 4));
   textNode.setAttribute("y", String(+y + circleRadius / 4));
