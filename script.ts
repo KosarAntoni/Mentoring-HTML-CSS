@@ -8,14 +8,14 @@ let id: number = 0;
 const verticesNames: { [key: string]: number } = {};
 const graph: graph = [];
 
-const addVertex = (name: string) => {
+export const addVertex = (name: string) => {
   verticesNames[name] = id;
   graph.forEach((value) => value.push(0));
   graph.push(new Array(id + 1).fill(0));
   id++;
 };
 
-const addEdge = (from: string, to: string, weight: number) => {
+export const addEdge = (from: string, to: string, weight: number) => {
   if (!(from in verticesNames)) {
     throw new Error(`Vertex ${from} doesn't exist`);
   }
@@ -31,12 +31,12 @@ const addEdge = (from: string, to: string, weight: number) => {
   graph[toId][fromId] = weight;
 };
 
-const returnString = (): string => {
+export const returnString = (): string => {
   const array = graph.map((element) => `\n${element.join(", ")}`);
   return array.join();
 };
 
-const dijkstra = (start: string) => {
+export const dijkstra = (start: string) => {
   const graphLength = graph.length;
   const startIndex = verticesNames[start];
   const distances = new Array(graphLength).fill(Infinity);
@@ -68,7 +68,7 @@ const dijkstra = (start: string) => {
   return distances;
 };
 
-const getShortest = (from: string, to: string) => {
+export const getShortest = (from: string, to: string) => {
   const toIndex = verticesNames[to];
   const dijkstraResult = dijkstra(from);
   const shortestPath = dijkstraResult[toIndex];
@@ -80,27 +80,57 @@ const getShortest = (from: string, to: string) => {
   return `Shortest path from ${from} to ${to} is ${shortestPath}`;
 };
 
-// let graph = new Graph();
-// graph.addVertex("A");
-// graph.addVertex("B");
-// graph.addVertex("C");
-// graph.addVertex("D");
-// graph.addVertex("E");
-// graph.addVertex("F");
-// graph.addVertex("G");
-// graph.addVertex("H");
+const graphContainerHeight = 200;
+const graphContainerWidth = 200;
 
-// graph.addEdge("A", "B", 2);
-// graph.addEdge("B", "F", 1);
-// graph.addEdge("A", "C", 1);
-// graph.addEdge("C", "D", 10);
-// graph.addEdge("D", "F", 6);
-// graph.addEdge("C", "E", 8);
-// graph.addEdge("E", "F", 2);
-// graph.addEdge("F", "G", 4);
+const mainNode = document.querySelector("main");
+const graphContainerNode: HTMLElement =
+  document.querySelector("#graph-container")!;
+graphContainerNode.style.position = "relative";
+graphContainerNode.style.width = `${graphContainerHeight}px`;
+graphContainerNode.style.height = `${graphContainerWidth}px`;
 
-// console.log(graph.toString());
-// console.log(graph.dijkstra("A"));
-// console.log(graph.getShortest("A", "C"));
-// console.log(graph.getShortest("A", "D"));
-// console.log(graph.getShortest("A", "H"));
+addVertex("A");
+addVertex("B");
+addVertex("C");
+addVertex("D");
+addVertex("E");
+addVertex("F");
+addVertex("G");
+addVertex("H");
+
+addEdge("A", "B", 2);
+addEdge("B", "F", 1);
+addEdge("A", "C", 1);
+addEdge("C", "D", 10);
+addEdge("D", "F", 6);
+addEdge("C", "E", 8);
+addEdge("E", "F", 2);
+addEdge("F", "G", 4);
+
+console.log(toString());
+console.log(dijkstra("A"));
+console.log(getShortest("A", "C"));
+console.log(getShortest("A", "D"));
+console.log(getShortest("A", "H"));
+
+Object.keys(verticesNames).forEach((vertex: string, index: number) => {
+  const buttonNode = document.createElement("button");
+  buttonNode.innerText = vertex;
+  buttonNode.setAttribute("id", verticesNames[vertex].toString());
+  buttonNode.style.position = "absolute";
+  buttonNode.style.top =
+    String(
+      graphContainerHeight +
+        -graphContainerHeight *
+          Math.cos((360 / graph.length / 180) * index * Math.PI)
+    ) + "px";
+  buttonNode.style.left =
+    String(
+      graphContainerWidth +
+        graphContainerWidth *
+          Math.sin((360 / graph.length / 180) * index * Math.PI)
+    ) + "px";
+
+  graphContainerNode?.appendChild(buttonNode);
+});
