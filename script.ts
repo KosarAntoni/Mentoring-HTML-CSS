@@ -1,16 +1,13 @@
-type vertex = {
-  [key: string]: number;
-};
-
-type graph = Array<Array<number>>;
+import { graph, vertex } from "./models";
 
 let id: number = 0;
-const verticesNames: { [key: string]: number } = {};
+const verticesNames: vertex = {};
 const graph: graph = [];
+const verteciesCoordinates: string[][] = [];
 
 export const addVertex = (name: string) => {
   verticesNames[name] = id;
-  graph.forEach((value) => value.push(0));
+  graph.forEach((value: number[]) => value.push(0));
   graph.push(new Array(id + 1).fill(0));
   id++;
 };
@@ -80,15 +77,22 @@ export const getShortest = (from: string, to: string) => {
   return `Shortest path from ${from} to ${to} is ${shortestPath}`;
 };
 
-const graphContainerHeight = 200;
-const graphContainerWidth = 200;
+const graphContainerHeight = 400;
+const graphContainerWidth = 400;
+const circleRadius = 20;
 
 const mainNode = document.querySelector("main");
-const graphContainerNode: HTMLElement =
-  document.querySelector("#graph-container")!;
-graphContainerNode.style.position = "relative";
-graphContainerNode.style.width = `${graphContainerHeight}px`;
-graphContainerNode.style.height = `${graphContainerWidth}px`;
+const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+const svgNS = svgNode.namespaceURI;
+svgNode.setAttribute("width", String(graphContainerWidth));
+svgNode.setAttribute("height", String(graphContainerHeight));
+svgNode.setAttribute(
+  "viewBox",
+  `-${circleRadius} -${circleRadius} ${
+    graphContainerWidth + circleRadius * 2
+  } ${graphContainerHeight + circleRadius * 2}`
+);
+mainNode?.appendChild(svgNode);
 
 addVertex("A");
 addVertex("B");
@@ -114,23 +118,65 @@ console.log(getShortest("A", "C"));
 console.log(getShortest("A", "D"));
 console.log(getShortest("A", "H"));
 
+//render vertices
+const verteciesContainer = document.createElementNS(svgNS, "g");
 Object.keys(verticesNames).forEach((vertex: string, index: number) => {
-  const buttonNode = document.createElement("button");
-  buttonNode.innerText = vertex;
-  buttonNode.setAttribute("id", verticesNames[vertex].toString());
-  buttonNode.style.position = "absolute";
-  buttonNode.style.top =
-    String(
-      graphContainerHeight +
-        -graphContainerHeight *
-          Math.cos((360 / graph.length / 180) * index * Math.PI)
-    ) + "px";
-  buttonNode.style.left =
-    String(
-      graphContainerWidth +
-        graphContainerWidth *
-          Math.sin((360 / graph.length / 180) * index * Math.PI)
-    ) + "px";
+  const position = (360 / graph.length / 180) * index * Math.PI;
+  const x = String(
+    (graphContainerHeight + -graphContainerHeight * Math.cos(position)) / 2
+  );
+  const y = String(
+    (graphContainerWidth + graphContainerWidth * Math.sin(position)) / 2
+  );
 
-  graphContainerNode?.appendChild(buttonNode);
+  const groupeNode = document.createElementNS(svgNS, "g");
+  groupeNode.style.cursor = "pointer";
+  groupeNode.addEventListener("mousedown", () => console.log("click"));
+
+  const circleNode = document.createElementNS(svgNS, "circle");
+  circleNode.setAttribute("id", verticesNames[vertex].toString());
+  circleNode.setAttribute("fill", "white");
+  circleNode.setAttribute("stroke", "black");
+  circleNode.setAttribute("stroke-width", "2");
+  circleNode.setAttribute("stroke-alignment", "inside");
+  circleNode.setAttribute("r", String(circleRadius - 4));
+  circleNode.setAttribute("cx", x);
+  circleNode.setAttribute("cy", y);
+
+  groupeNode.appendChild(circleNode);
+
+  const textNode = document.createElementNS(svgNS, "text");
+  textNode.innerHTML = vertex;
+  textNode.setAttribute("x", String(+x - circleRadius / 4));
+  textNode.setAttribute("y", String(+y + circleRadius / 4));
+  textNode.setAttribute("fill", "black");
+  textNode.style.userSelect = "none";
+  groupeNode.appendChild(textNode);
+
+  verteciesCoordinates.push([x, y]);
+  verteciesContainer?.appendChild(groupeNode);
 });
+
+// render paths
+graph.forEach((row, rowIndex) => {
+  row.forEach((cell, cellIndex) => {
+    if (cell !== 0) {
+      const lineNode = document.createElementNS(svgNS, "line");
+      const [x1, y1] = verteciesCoordinates[rowIndex];
+      const [x2, y2] = verteciesCoordinates[cellIndex];
+
+      lineNode.setAttribute("x1", x1);
+      lineNode.setAttribute("y1", y1);
+
+      lineNode.setAttribute("x2", x2);
+      lineNode.setAttribute("y2", y2);
+
+      lineNode.setAttribute("stroke", "black");
+      lineNode.setAttribute("stroke-width", "2");
+
+      svgNode?.appendChild(lineNode);
+    }
+  });
+});
+
+svgNode.appendChild(verteciesContainer);

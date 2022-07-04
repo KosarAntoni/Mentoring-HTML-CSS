@@ -1,7 +1,5 @@
-export type stateKeys = "view" | "mode" | "allValue";
-
-export type state = {
-  allValue?: string | number;
-  mode?: "all" | "idependent" | string;
-  view?: "text" | "sliders" | string;
+export type vertex = {
+  [key: string]: number;
 };
+
+export type graph = Array<Array<number>>;
