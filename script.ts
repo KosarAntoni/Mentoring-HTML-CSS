@@ -3,7 +3,7 @@ import { graph, vertex } from "./models";
 let id: number = 0;
 const verticesNames: vertex = {};
 const graph: graph = [];
-const verteciesCoordinates: string[][] = [];
+let verteciesCoordinates: string[][] = [];
 
 export const addVertex = (name: string) => {
   verticesNames[name] = id;
@@ -12,7 +12,7 @@ export const addVertex = (name: string) => {
   id++;
 };
 
-export const addEdge = (from: string, to: string, weight: number) => {
+export const addPath = (from: string, to: string, weight: number) => {
   if (!(from in verticesNames)) {
     throw new Error(`Vertex ${from} doesn't exist`);
   }
@@ -77,11 +77,71 @@ export const getShortest = (from: string, to: string) => {
   return `Shortest path from ${from} to ${to} is ${shortestPath}`;
 };
 
+addVertex("A");
+addVertex("B");
+addVertex("C");
+addVertex("D");
+addVertex("E");
+addVertex("F");
+addVertex("G");
+addVertex("H");
+
+addPath("A", "B", 2);
+addPath("B", "F", 1);
+addPath("A", "C", 1);
+addPath("C", "D", 10);
+addPath("D", "F", 6);
+addPath("C", "E", 8);
+addPath("E", "F", 2);
+addPath("F", "G", 4);
+
+console.log(toString());
+console.log(dijkstra("A"));
+console.log(getShortest("A", "C"));
+console.log(getShortest("A", "D"));
+console.log(getShortest("A", "H"));
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 const graphContainerHeight = 400;
 const graphContainerWidth = 400;
 const circleRadius = 20;
 
 const mainNode = document.querySelector("main");
+
 const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 const svgNS = svgNode.namespaceURI;
 svgNode.setAttribute("width", String(graphContainerWidth));
@@ -94,33 +154,13 @@ svgNode.setAttribute(
 );
 mainNode?.appendChild(svgNode);
 
-addVertex("A");
-addVertex("B");
-addVertex("C");
-addVertex("D");
-addVertex("E");
-addVertex("F");
-addVertex("G");
-addVertex("H");
-
-addEdge("A", "B", 2);
-addEdge("B", "F", 1);
-addEdge("A", "C", 1);
-addEdge("C", "D", 10);
-addEdge("D", "F", 6);
-addEdge("C", "E", 8);
-addEdge("E", "F", 2);
-addEdge("F", "G", 4);
-
-console.log(toString());
-console.log(dijkstra("A"));
-console.log(getShortest("A", "C"));
-console.log(getShortest("A", "D"));
-console.log(getShortest("A", "H"));
-
 //render vertices
+const pathsContainer = document.createElementNS(svgNS, "g");
 const verteciesContainer = document.createElementNS(svgNS, "g");
-Object.keys(verticesNames).forEach((vertex: string, index: number) => {
+svgNode.appendChild(pathsContainer);
+svgNode.appendChild(verteciesContainer);
+
+const renderVertex = (vertex: string, index: number) => {
   const position = (360 / graph.length / 180) * index * Math.PI;
   const x = String(
     (graphContainerHeight + -graphContainerHeight * Math.cos(position)) / 2
@@ -134,7 +174,7 @@ Object.keys(verticesNames).forEach((vertex: string, index: number) => {
   groupeNode.addEventListener("mousedown", () => console.log("click"));
 
   const circleNode = document.createElementNS(svgNS, "circle");
-  circleNode.setAttribute("id", verticesNames[vertex].toString());
+  circleNode.setAttribute("id", String(verticesNames[vertex]));
   circleNode.setAttribute("fill", "white");
   circleNode.setAttribute("stroke", "black");
   circleNode.setAttribute("stroke-width", "2");
@@ -154,29 +194,136 @@ Object.keys(verticesNames).forEach((vertex: string, index: number) => {
   groupeNode.appendChild(textNode);
 
   verteciesCoordinates.push([x, y]);
-  verteciesContainer?.appendChild(groupeNode);
-});
+  verteciesContainer.appendChild(groupeNode);
+};
+
+const renderVertecies = () => {
+  Object.keys(verticesNames).forEach((vertex: string, index: number) =>
+    renderVertex(vertex, index)
+  );
+};
 
 // render paths
-graph.forEach((row, rowIndex) => {
-  row.forEach((cell, cellIndex) => {
-    if (cell !== 0) {
-      const lineNode = document.createElementNS(svgNS, "line");
-      const [x1, y1] = verteciesCoordinates[rowIndex];
-      const [x2, y2] = verteciesCoordinates[cellIndex];
+const renderLine = (x1: string, y1: string, x2: string, y2: string) => {
+  const lineNode = document.createElementNS(svgNS, "line");
 
-      lineNode.setAttribute("x1", x1);
-      lineNode.setAttribute("y1", y1);
+  lineNode.setAttribute("x1", x1);
+  lineNode.setAttribute("y1", y1);
 
-      lineNode.setAttribute("x2", x2);
-      lineNode.setAttribute("y2", y2);
+  lineNode.setAttribute("x2", x2);
+  lineNode.setAttribute("y2", y2);
 
-      lineNode.setAttribute("stroke", "black");
-      lineNode.setAttribute("stroke-width", "2");
+  lineNode.setAttribute("stroke", "black");
+  lineNode.setAttribute("stroke-width", "2");
 
-      svgNode?.appendChild(lineNode);
-    }
+  pathsContainer.appendChild(lineNode);
+};
+
+const renderPaths = () => {
+  graph.forEach((row, rowIndex) => {
+    row.forEach((cell, cellIndex) => {
+      if (cell !== 0) {
+        const [x1, y1] = verteciesCoordinates[rowIndex];
+        const [x2, y2] = verteciesCoordinates[cellIndex];
+
+        renderLine(x1, y1, x2, y2);
+      }
+    });
   });
-});
+};
 
-svgNode.appendChild(verteciesContainer);
+const reRenderSvg = () => {
+  verteciesContainer.innerHTML = "";
+  pathsContainer.innerHTML = "";
+  verteciesCoordinates = [];
+  renderVertecies();
+  renderPaths();
+};
+
+const renderInput = (id: string, label?: string, value?: string) => {
+  const wrapperNode = document.createElement("span");
+
+  if (label) {
+    const labelNode = document.createElement("label");
+    labelNode.setAttribute("for", id);
+    labelNode.innerText = label;
+    wrapperNode.appendChild(labelNode);
+  }
+
+  const inputNode = document.createElement("input");
+  inputNode.setAttribute("type", "text");
+  inputNode.setAttribute("id", id);
+  inputNode.setAttribute("maxlength", "1");
+  if (value) inputNode.value = value.toString();
+  wrapperNode.appendChild(inputNode);
+
+  return wrapperNode;
+};
+
+const renderField = (name: string, label: string) => {
+  const fieldsetNode = document.createElement("fieldset");
+
+  const legendNode = document.createElement("legend");
+  legendNode.innerText = name;
+  fieldsetNode.appendChild(legendNode);
+
+  const id = name.toLowerCase();
+  const inputNode = renderInput(id, label);
+  fieldsetNode.appendChild(inputNode);
+
+  return fieldsetNode;
+};
+
+const renderAddVertexForm = (
+  name: string,
+  label: string,
+  onSubmit: {
+    (e: { preventDefault: () => void }): void;
+    (this: HTMLFormElement, ev: SubmitEvent): any;
+  }
+) => {
+  let value = "";
+  const formNode = document.createElement("form");
+  if (onSubmit) {
+    formNode.addEventListener("submit", (e) => onSubmit(e, value));
+  }
+
+  const fieldsetNode = renderField(name, label);
+  const fieldsetInputNode = fieldsetNode.querySelector("input");
+  fieldsetInputNode!.value = value;
+  fieldsetInputNode?.addEventListener("change", (e) => {
+    value = e.target.value;
+  });
+  formNode.appendChild(fieldsetNode);
+
+  const buttonNode = document.createElement("button");
+  buttonNode.innerText = "add";
+  buttonNode.setAttribute("type", "submit");
+  fieldsetNode.appendChild(buttonNode);
+
+  return formNode;
+};
+
+const onVertexSubmit = (e: { preventDefault: () => void }, value: string) => {
+  e.preventDefault();
+  if (verticesNames[value]) {
+    alert("Vertex already exist");
+    return;
+  }
+  if (!value) {
+    alert("Name shoudn't be emthy");
+    return;
+  }
+  addVertex(value);
+  reRenderSvg();
+};
+
+const addVertexNode = renderAddVertexForm(
+  "Add vertex",
+  "Vertex name: ",
+  onVertexSubmit
+);
+mainNode?.append(addVertexNode);
+
+renderVertecies();
+renderPaths();
