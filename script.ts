@@ -274,19 +274,26 @@ const renderField = (name: string, label: string) => {
   return fieldsetNode;
 };
 
-const renderAddVertexForm = (
-  name: string,
-  label: string,
-  onSubmit: {
-    (e: any, value: string): void;
-    (arg0: SubmitEvent, arg1: string): any;
-  }
-) => {
+const renderAddVertexForm = () => {
+  const name = "Add vertex";
+  const label = "Vertex name: ";
+  const onVertexSubmit = (e: { preventDefault: () => void }, value: string) => {
+    e.preventDefault();
+    if (verticesNames[value]) {
+      alert("Vertex already exist");
+      return;
+    }
+    if (!value) {
+      alert("Name shoudn't be emthy");
+      return;
+    }
+    addVertex(value);
+    reRenderSvg();
+  };
+
   let value = "";
   const formNode = document.createElement("form");
-  if (onSubmit) {
-    formNode.addEventListener("submit", (e) => onSubmit(e, value));
-  }
+  formNode.addEventListener("submit", (e) => onVertexSubmit(e, value));
 
   const fieldsetNode = renderField(name, label);
   const fieldsetInputNode = fieldsetNode.querySelector("input");
@@ -302,29 +309,84 @@ const renderAddVertexForm = (
   buttonNode.setAttribute("type", "submit");
   fieldsetNode.appendChild(buttonNode);
 
-  return formNode;
+  mainNode?.append(formNode);
 };
 
-const onVertexSubmit = (e: { preventDefault: () => void }, value: string) => {
-  e.preventDefault();
-  if (verticesNames[value]) {
-    alert("Vertex already exist");
-    return;
-  }
-  if (!value) {
-    alert("Name shoudn't be emthy");
-    return;
-  }
-  addVertex(value);
-  reRenderSvg();
+const renderAddPathForm = () => {
+  let fromValue = "";
+  let toValue = "";
+  let weightValue = "";
+  const name = "Add path";
+  const onSubmit = (
+    e: { preventDefault: () => void },
+    value1: string,
+    value2: string,
+    weight: string
+  ) => {
+    e.preventDefault();
+    if (!verticesNames[value1]) {
+      alert(`Vertexv ${value1} doesn't exist`);
+      return;
+    }
+    if (!value1) {
+      alert("Name shoudn't be emthy");
+      return;
+    }
+    addPath(value1, value2, Number(weight));
+    const [x1, y1] = verteciesCoordinates[verticesNames[value1]];
+    const [x2, y2] = verteciesCoordinates[verticesNames[value2]];
+
+    renderLine(x1, y1, x2, y2);
+  };
+
+  const formNode = document.createElement("form");
+  formNode.addEventListener("submit", (e) =>
+    onSubmit(e, fromValue, toValue, weightValue)
+  );
+
+  const fieldsetNode = document.createElement("fieldset");
+  formNode.appendChild(fieldsetNode);
+
+  const legendNode = document.createElement("legend");
+  legendNode.innerText = name;
+  fieldsetNode.appendChild(legendNode);
+
+  const fromNode = renderInput("from", "From: ");
+  const fromInputNode = fromNode.querySelector("input");
+  fromInputNode!.value = fromValue;
+  fromInputNode?.addEventListener("change", (e) => {
+    const target = e.target! as HTMLInputElement;
+    fromValue = target.value;
+  });
+  fieldsetNode.appendChild(fromNode);
+
+  const toNode = renderInput("to", " to: ");
+  const toInputNode = toNode.querySelector("input");
+  toInputNode!.value = toValue;
+  toInputNode?.addEventListener("change", (e) => {
+    const target = e.target! as HTMLInputElement;
+    toValue = target.value;
+  });
+  fieldsetNode.appendChild(toNode);
+
+  const weightNode = renderInput("weight", " weight: ");
+  const weightInputNode = toNode.querySelector("input");
+  weightInputNode!.value = toValue;
+  weightInputNode?.addEventListener("change", (e) => {
+    const target = e.target! as HTMLInputElement;
+    weightValue = target.value;
+  });
+  fieldsetNode.appendChild(weightNode);
+
+  const buttonNode = document.createElement("button");
+  buttonNode.innerText = "add";
+  buttonNode.setAttribute("type", "submit");
+  fieldsetNode.appendChild(buttonNode);
+
+  mainNode?.append(formNode);
 };
 
-const addVertexNode = renderAddVertexForm(
-  "Add vertex",
-  "Vertex name: ",
-  onVertexSubmit
-);
-mainNode?.append(addVertexNode);
-
+renderAddVertexForm();
+renderAddPathForm();
 renderVertecies();
 renderPaths();
