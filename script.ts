@@ -4,6 +4,7 @@ let id: number = 0;
 const verticesNames: vertex = {};
 const graph: graph = [];
 let verteciesCoordinates: string[][] = [];
+let verteciesChain: number[] = [];
 
 export const addVertex = (name: string) => {
   verticesNames[name] = id;
@@ -62,6 +63,7 @@ export const dijkstra = (start: string) => {
     visitedVertecies.push(currentIndex);
   }
 
+  verteciesChain = visitedVertecies;
   return distances;
 };
 
@@ -101,41 +103,6 @@ console.log(getShortest("A", "C"));
 console.log(getShortest("A", "D"));
 console.log(getShortest("A", "H"));
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
 const graphContainerHeight = 400;
 const graphContainerWidth = 400;
 const circleRadius = 20;
@@ -170,11 +137,9 @@ const renderVertex = (vertex: string, index: number) => {
   );
 
   const groupeNode = document.createElementNS(svgNS, "g") as HTMLElement;
-  groupeNode.style.cursor = "pointer";
-  groupeNode.addEventListener("mousedown", () => console.log("click"));
 
   const circleNode = document.createElementNS(svgNS, "circle");
-  circleNode.setAttribute("id", String(verticesNames[vertex]));
+  circleNode.setAttribute("id", `vertex-${verticesNames[vertex]}`);
   circleNode.setAttribute("fill", "white");
   circleNode.setAttribute("stroke", "black");
   circleNode.setAttribute("stroke-width", "2");
@@ -250,7 +215,7 @@ const renderPaths = () => {
         const [x1, y1] = verteciesCoordinates[rowIndex];
         const [x2, y2] = verteciesCoordinates[cellIndex];
 
-        renderLine(x1, y1, x2, y2, cell);
+        renderLine(x1, y1, x2, y2, String(cell));
       }
     });
   });
@@ -302,7 +267,7 @@ const renderAddVertexForm = () => {
   let value = "";
   const name = "Add vertex";
   const label = "Vertex name: ";
-  const onVertexSubmit = (e: { preventDefault: () => void }, value: string) => {
+  const onSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (verticesNames[value]) {
       alert("Vertex already exist");
@@ -319,7 +284,7 @@ const renderAddVertexForm = () => {
   };
 
   const formNode = document.createElement("form");
-  formNode.addEventListener("submit", (e) => onVertexSubmit(e, value));
+  formNode.addEventListener("submit", onSubmit);
 
   const fieldsetNode = renderField(name, label);
   const fieldsetInputNode = fieldsetNode.querySelector("input");
@@ -344,12 +309,7 @@ const renderAddPathForm = () => {
   let weightValue = "";
   const name = "Add path";
 
-  const onSubmit = (
-    e: { preventDefault: () => void },
-    value1: string,
-    value2: string,
-    weight: string
-  ) => {
+  const onSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     // if (!verticesNames[value1]) {
     //   alert(`Vertexv ${value1} doesn't exist`);
@@ -359,11 +319,11 @@ const renderAddPathForm = () => {
     //   alert("Name shoudn't be emthy");
     //   return;
     // }
-    addPath(value1, value2, Number(weight));
-    const [x1, y1] = verteciesCoordinates[verticesNames[value1]];
-    const [x2, y2] = verteciesCoordinates[verticesNames[value2]];
+    addPath(fromValue, toValue, Number(weightValue));
+    const [x1, y1] = verteciesCoordinates[verticesNames[fromValue]];
+    const [x2, y2] = verteciesCoordinates[verticesNames[toValue]];
 
-    renderLine(x1, y1, x2, y2, weight);
+    renderLine(x1, y1, x2, y2, weightValue);
 
     fromValue = "";
     toValue = "";
@@ -374,9 +334,7 @@ const renderAddPathForm = () => {
   };
 
   const formNode = document.createElement("form");
-  formNode.addEventListener("submit", (e) =>
-    onSubmit(e, fromValue, toValue, weightValue)
-  );
+  formNode.addEventListener("submit", onSubmit);
 
   const fieldsetNode = document.createElement("fieldset");
   formNode.appendChild(fieldsetNode);
@@ -420,7 +378,83 @@ const renderAddPathForm = () => {
   mainNode?.append(formNode);
 };
 
+const showPath = (path: number[]) => {
+  console.log(path);
+  path.forEach((value, index) => {
+    const circleNode = verteciesContainer.querySelector(`#vertex-${value}`);
+    setTimeout(() => {
+      circleNode!.setAttribute("fill", "red");
+    }, 300 * index);
+  });
+};
+
+const renderGetShortestForm = () => {
+  let fromValue = "";
+  let toValue = "";
+  let resultValue = "";
+
+  const name = "Get shortest path";
+
+  const onSubmit = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+
+    resultInputNode!.value = getShortest(fromValue, toValue);
+    const shortestPath = verteciesChain.slice(0, verticesNames[toValue]);
+    showPath(shortestPath);
+    fromValue = "";
+    toValue = "";
+    fromInputNode!.value = fromValue;
+    toInputNode!.value = toValue;
+  };
+
+  const formNode = document.createElement("form");
+  formNode.addEventListener("submit", onSubmit);
+
+  const fieldsetNode = document.createElement("fieldset");
+  formNode.appendChild(fieldsetNode);
+
+  const legendNode = document.createElement("legend");
+  legendNode.innerText = name;
+  fieldsetNode.appendChild(legendNode);
+
+  const fromNode = renderInput("from", "From: ");
+  const fromInputNode = fromNode.querySelector("input");
+  fromInputNode!.value = fromValue;
+  fromInputNode?.addEventListener("change", (e) => {
+    const target = e.target! as HTMLInputElement;
+    fromValue = target.value;
+  });
+  fieldsetNode.appendChild(fromNode);
+
+  const toNode = renderInput("to", " to: ");
+  const toInputNode = toNode.querySelector("input");
+  toInputNode!.value = toValue;
+  toInputNode?.addEventListener("change", (e) => {
+    const target = e.target! as HTMLInputElement;
+    toValue = target.value;
+  });
+  fieldsetNode.appendChild(toNode);
+
+  const buttonNode = document.createElement("button");
+  buttonNode.innerText = "get";
+  buttonNode.setAttribute("type", "submit");
+  fieldsetNode.appendChild(buttonNode);
+
+  const resultNode = renderInput("result", " result: ", resultValue);
+  const resultInputNode = resultNode.querySelector("input");
+  resultInputNode?.setAttribute("disabled", "true");
+  resultInputNode?.setAttribute("size", "50");
+  resultInputNode?.addEventListener("change", (e) => {
+    const target = e.target! as HTMLInputElement;
+    resultValue = target.value;
+  });
+  fieldsetNode.appendChild(resultNode);
+
+  mainNode?.append(formNode);
+};
+
 renderAddVertexForm();
 renderAddPathForm();
+renderGetShortestForm();
 renderVertecies();
 renderPaths();
