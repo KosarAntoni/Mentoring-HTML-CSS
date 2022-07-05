@@ -275,6 +275,7 @@ const renderField = (name: string, label: string) => {
 };
 
 const renderAddVertexForm = () => {
+  let value = "";
   const name = "Add vertex";
   const label = "Vertex name: ";
   const onVertexSubmit = (e: { preventDefault: () => void }, value: string) => {
@@ -289,9 +290,10 @@ const renderAddVertexForm = () => {
     }
     addVertex(value);
     reRenderSvg();
+    value = "";
+    fieldsetInputNode!.value = value;
   };
 
-  let value = "";
   const formNode = document.createElement("form");
   formNode.addEventListener("submit", (e) => onVertexSubmit(e, value));
 
@@ -317,6 +319,7 @@ const renderAddPathForm = () => {
   let toValue = "";
   let weightValue = "";
   const name = "Add path";
+
   const onSubmit = (
     e: { preventDefault: () => void },
     value1: string,
@@ -324,19 +327,26 @@ const renderAddPathForm = () => {
     weight: string
   ) => {
     e.preventDefault();
-    if (!verticesNames[value1]) {
-      alert(`Vertexv ${value1} doesn't exist`);
-      return;
-    }
-    if (!value1) {
-      alert("Name shoudn't be emthy");
-      return;
-    }
+    // if (!verticesNames[value1]) {
+    //   alert(`Vertexv ${value1} doesn't exist`);
+    //   return;
+    // }
+    // if (!value1) {
+    //   alert("Name shoudn't be emthy");
+    //   return;
+    // }
     addPath(value1, value2, Number(weight));
     const [x1, y1] = verteciesCoordinates[verticesNames[value1]];
     const [x2, y2] = verteciesCoordinates[verticesNames[value2]];
 
     renderLine(x1, y1, x2, y2);
+
+    fromValue = "";
+    toValue = "";
+    weightValue = "";
+    fromInputNode!.value = fromValue;
+    toInputNode!.value = toValue;
+    weightInputNode!.value = weightValue;
   };
 
   const formNode = document.createElement("form");
@@ -371,7 +381,7 @@ const renderAddPathForm = () => {
 
   const weightNode = renderInput("weight", " weight: ");
   const weightInputNode = toNode.querySelector("input");
-  weightInputNode!.value = toValue;
+  weightInputNode!.value = weightValue;
   weightInputNode?.addEventListener("change", (e) => {
     const target = e.target! as HTMLInputElement;
     weightValue = target.value;
