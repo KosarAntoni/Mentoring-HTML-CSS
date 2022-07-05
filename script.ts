@@ -204,19 +204,43 @@ const renderVertecies = () => {
 };
 
 // render paths
-const renderLine = (x1: string, y1: string, x2: string, y2: string) => {
+const renderLine = (
+  x1: string,
+  y1: string,
+  x2: string,
+  y2: string,
+  weight: string
+) => {
+  const groupeNode = document.createElementNS(svgNS, "g") as HTMLElement;
+
   const lineNode = document.createElementNS(svgNS, "line");
 
   lineNode.setAttribute("x1", x1);
   lineNode.setAttribute("y1", y1);
-
   lineNode.setAttribute("x2", x2);
   lineNode.setAttribute("y2", y2);
-
   lineNode.setAttribute("stroke", "black");
   lineNode.setAttribute("stroke-width", "2");
+  groupeNode.appendChild(lineNode);
 
-  pathsContainer.appendChild(lineNode);
+  const textX = (+x1 + +x2) / 2;
+  const textY = (+y1 + +y2) / 2;
+  const circleNode = document.createElementNS(svgNS, "circle");
+  circleNode.setAttribute("fill", "white");
+  circleNode.setAttribute("r", String(circleRadius / 2));
+  circleNode.setAttribute("cx", String(textX));
+  circleNode.setAttribute("cy", String(textY));
+
+  groupeNode.appendChild(circleNode);
+  const textNode = document.createElementNS(svgNS, "text") as HTMLElement;
+  textNode.innerHTML = weight;
+  textNode.setAttribute("x", String(textX - circleRadius / 4));
+  textNode.setAttribute("y", String(textY + circleRadius / 4));
+  textNode.setAttribute("fill", "black");
+  textNode.style.userSelect = "none";
+  groupeNode.appendChild(textNode);
+
+  pathsContainer.appendChild(groupeNode);
 };
 
 const renderPaths = () => {
@@ -226,7 +250,7 @@ const renderPaths = () => {
         const [x1, y1] = verteciesCoordinates[rowIndex];
         const [x2, y2] = verteciesCoordinates[cellIndex];
 
-        renderLine(x1, y1, x2, y2);
+        renderLine(x1, y1, x2, y2, cell);
       }
     });
   });
@@ -339,7 +363,7 @@ const renderAddPathForm = () => {
     const [x1, y1] = verteciesCoordinates[verticesNames[value1]];
     const [x2, y2] = verteciesCoordinates[verticesNames[value2]];
 
-    renderLine(x1, y1, x2, y2);
+    renderLine(x1, y1, x2, y2, weight);
 
     fromValue = "";
     toValue = "";
@@ -380,7 +404,7 @@ const renderAddPathForm = () => {
   fieldsetNode.appendChild(toNode);
 
   const weightNode = renderInput("weight", " weight: ");
-  const weightInputNode = toNode.querySelector("input");
+  const weightInputNode = weightNode.querySelector("input");
   weightInputNode!.value = weightValue;
   weightInputNode?.addEventListener("change", (e) => {
     const target = e.target! as HTMLInputElement;
