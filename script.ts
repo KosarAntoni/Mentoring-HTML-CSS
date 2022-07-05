@@ -278,8 +278,8 @@ const renderAddVertexForm = (
   name: string,
   label: string,
   onSubmit: {
-    (e: { preventDefault: () => void }): void;
-    (this: HTMLFormElement, ev: SubmitEvent): any;
+    (e: any, value: string): void;
+    (arg0: SubmitEvent, arg1: string): any;
   }
 ) => {
   let value = "";
@@ -292,7 +292,8 @@ const renderAddVertexForm = (
   const fieldsetInputNode = fieldsetNode.querySelector("input");
   fieldsetInputNode!.value = value;
   fieldsetInputNode?.addEventListener("change", (e) => {
-    value = e.target.value;
+    const target = e.target! as HTMLInputElement;
+    value = target.value;
   });
   formNode.appendChild(fieldsetNode);
 
