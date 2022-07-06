@@ -1,0 +1,22 @@
+{
+  "name": "mentoring-html-css",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KosarAntoni/Mentoring-HTML-CSS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KosarAntoni/Mentoring-HTML-CSS/issues"
+  },
+  "homepage": "https://github.com/KosarAntoni/Mentoring-HTML-CSS#readme"
+}
